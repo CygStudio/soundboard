@@ -18,3 +18,10 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+
+rules:
+  proposal:
+    - 所有 OpenSpec artifacts 與文件皆使用正體中文（zh-TW），只保留必要的 OpenSpec schema 關鍵字、技術識別字與指令為英文。
+    - Always include a "Non-goals" section
+  tasks:
+    - Break tasks into chunks of max 1 hours
