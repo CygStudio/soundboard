@@ -1,23 +1,28 @@
-## 1. Workspace foundation
+## 1. 工作區基礎
 
-- [ ] 1.1 Initialize the `pnpm` workspace and `moon` project graph for `apps/playground`, `packages/core`, `packages/ui`, and `packages/widget`
-- [ ] 1.2 Add shared TypeScript, Oxlint, Vitest, and common workspace task configuration for `dev`, `build`, `test`, `lint`, and `typecheck`
-- [ ] 1.3 Configure Vite 8 for the playground app and Rolldown-based library builds for the reusable packages
+- [ ] 1.1 建立 `pnpm` workspace 基礎檔案與 root package 設定
+- [ ] 1.2 建立 `moon` 工作區與各專案的基礎設定
+- [ ] 1.3 加入共享的 TypeScript 設定與 `typecheck` task
+- [ ] 1.4 加入共享的 Oxlint、Vitest 設定與對應 task
+- [ ] 1.5 為 `apps/playground` 建立 Vite 8 開發基礎
+- [ ] 1.6 為可重用套件建立 Rolldown 建置基礎
 
-## 2. Core soundboard logic
+## 2. Core soundboard 邏輯
 
-- [ ] 2.1 Define typed soundboard domain models for categories, sound items, and widget input data in `packages/core`
-- [ ] 2.2 Implement framework-agnostic state and playback logic that enforces a single active sound item per widget instance
-- [ ] 2.3 Add tests for category switching, active item updates, and core data behavior
+- [ ] 2.1 在 `packages/core` 定義分類、音效項目與 widget 輸入資料的型別
+- [ ] 2.2 在 `packages/core` 實作分類切換狀態
+- [ ] 2.3 在 `packages/core` 實作單一 active 播放狀態與切換規則
+- [ ] 2.4 為 `core` 補上分類切換與 active 播放的單元測試
 
-## 3. UI and widget assembly
+## 3. UI 與 widget 組裝
 
-- [ ] 3.1 Build reusable Vue UI pieces in `packages/ui` for category controls, sound item rendering, and playback state presentation
-- [ ] 3.2 Assemble the embeddable widget package in `packages/widget` using `core` and `ui` with a host-facing public entry point
-- [ ] 3.3 Add widget-level tests covering category changes and playback interaction behavior
+- [ ] 3.1 在 `packages/ui` 建立分類控制元件
+- [ ] 3.2 在 `packages/ui` 建立音效項目呈現與播放狀態元件
+- [ ] 3.3 在 `packages/widget` 組裝公開的 widget 入口
+- [ ] 3.4 為 widget 補上分類切換與播放互動測試
 
-## 4. Playground integration
+## 4. Playground 整合
 
-- [ ] 4.1 Create the playground app surface that mounts the widget with representative sample data
-- [ ] 4.2 Verify the playground integration does not depend on landing-page hero, navigation, or other brand-shell components
-- [ ] 4.3 Run the standard workspace validation tasks and document any remaining follow-up needed for future shell/branding work
+- [ ] 4.1 在 `apps/playground` 建立範例資料與 widget 掛載頁面
+- [ ] 4.2 確認 `playground` 掛載不依賴 hero、navigation 或其他品牌殼層元件
+- [ ] 4.3 執行標準工作區驗證 task，並整理後續殼層 / 品牌相關待辦

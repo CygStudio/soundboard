@@ -1,27 +1,34 @@
-## Why
+## 為什麼
 
-The design work has clarified two separate needs: a reusable soundboard widget and a stable monorepo foundation to build it on. Creating both together now lets the project validate its package boundaries, toolchain, and embed model before more app-specific UI work accumulates around a temporary structure.
+目前的設計探索已經清楚分出兩個需求：一個是可重用的 soundboard widget，另一個是支撐後續開發的穩定 monorepo 基礎。現在一起處理，能先驗證 package 邊界、工具鏈與嵌入模型，避免後續把更多頁面層需求疊在暫時性的專案結構上。
 
-## What Changes
+## 變更內容
 
-- Create a `moon` + `pnpm` monorepo for the project with shared TypeScript, lint, test, and build workflows.
-- Introduce package boundaries for `core`, `ui`, and `widget`, plus an `apps/playground` app for local development and design validation.
-- Define and deliver a first working soundboard widget that supports category filtering, rendering sound items, and basic playback interactions.
-- Keep brand-heavy landing-page chrome out of the widget boundary so the widget can be embedded independently inside the playground and future hosts.
-- Standardize the initial toolchain around TypeScript, Vite 8, Vitest, Vue, Oxlint, and Rolldown.
+- 建立以 `pnpm` 管理、由 `moon` 編排的 monorepo，提供共享的 TypeScript、lint、test 與 build 流程。
+- 明確拆出 `packages/core`、`packages/ui`、`packages/widget`，以及用於本機開發與設計驗證的 `apps/playground`。
+- 定義並交付第一版可運作的 soundboard widget，支援分類切換、音效項目呈現與基礎播放互動。
+- 將品牌感較重的 landing page 殼層排除在 widget 邊界外，讓 widget 能獨立嵌入 `playground` 與未來宿主。
+- 將初始工具鏈標準化為 TypeScript、Vite 8、Vitest、Vue、Oxlint 與 Rolldown。
 
-## Capabilities
+## Non-goals
 
-### New Capabilities
-- `soundboard-workspace`: Defines the monorepo layout, shared toolchain, and package/app responsibilities for the soundboard project.
-- `soundboard-widget`: Defines the first reusable widget surface, including category navigation, sound item presentation, and playback behavior.
+- 本次 change 不處理完整 Stitch 首頁、hero 區塊、導覽列與其他品牌殼層還原。
+- 本次 change 不處理 CMS、遠端 API、內容管理後台或音效資產上傳流程。
+- 本次 change 不處理多個 widget instance 之間的同步播放或全域播放協調。
+- 本次 change 不處理 SSR、部署流程或正式營運環境基礎設施。
 
-### Modified Capabilities
-- None.
+## 能力範圍
 
-## Impact
+### 新增能力
+- `soundboard-workspace`：定義 soundboard 專案的 monorepo 佈局、共享工具鏈與 package / app 責任邊界。
+- `soundboard-widget`：定義第一版可重用 widget 的介面，包括分類導覽、音效項目呈現與播放行為。
 
-- Adds a new multi-package repository structure under `packages/` and `apps/`.
-- Introduces workspace-level configuration for `moon`, `pnpm`, TypeScript, Vite, Vitest, Oxlint, and Rolldown.
-- Establishes the initial public boundaries between domain logic, Vue UI components, and embeddable widget entry points.
-- Creates the baseline contract for later app-shell and branding work without requiring those concerns in the first widget delivery.
+### 調整既有能力
+- 無。
+
+## 影響
+
+- 新增 `packages/` 與 `apps/` 為主的多 package 儲存庫結構。
+- 新增 `moon`、`pnpm`、TypeScript、Vite、Vitest、Oxlint、Rolldown 的 workspace 級設定。
+- 明確建立 domain logic、Vue UI 元件與 embeddable widget 入口之間的公開邊界。
+- 為後續 app shell 與品牌視覺工作建立基礎契約，但不將這些需求綁入第一版 widget 交付範圍。
