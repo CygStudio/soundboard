@@ -1,0 +1,28 @@
+{
+  "name": "@soundboard/widget",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/widget.js",
+  "module": "./dist/widget.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/widget.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "dependencies": {
+    "@soundboard/core": "workspace:*",
+    "@soundboard/ui": "workspace:*",
+    "vue": "^3.5.32"
+  },
+  "scripts": {
+    "build": "pnpm run build:types && pnpm run build:styles && rolldown -c",
+    "build:styles": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
+    "build:types": "vue-tsc -p tsconfig.build.json",
+    "lint": "oxlint .",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
+  }
+}

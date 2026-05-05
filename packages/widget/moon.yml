@@ -1,0 +1,24 @@
+project:
+  type: library
+
+language: typescript
+dependsOn:
+  - core
+  - ui
+
+tasks:
+  build:
+    command: pnpm
+    args: ["build"]
+    deps:
+      - core:build
+      - ui:build
+  lint:
+    command: pnpm
+    args: ["lint"]
+  test:
+    command: pnpm
+    args: ["test"]
+  typecheck:
+    command: pnpm
+    args: ["typecheck"]

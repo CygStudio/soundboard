@@ -1,0 +1,17 @@
+{
+  "name": "@soundboard/playground",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@soundboard/widget": "workspace:*",
+    "vue": "^3.5.32"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "oxlint .",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
+  }
+}

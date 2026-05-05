@@ -1,0 +1,21 @@
+{
+  "name": "@soundboard/core",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/core.js",
+  "module": "./dist/core.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/core.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm run build:types && rolldown -c",
+    "build:types": "tsc -p tsconfig.build.json",
+    "lint": "oxlint .",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

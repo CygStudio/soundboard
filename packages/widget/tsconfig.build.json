@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "paths": {
+      "@soundboard/core": ["packages/core/dist/index.d.ts"],
+      "@soundboard/ui": ["packages/ui/dist/index.d.ts"]
+    },
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"]
+}

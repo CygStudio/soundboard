@@ -1,0 +1,25 @@
+project:
+  type: application
+
+language: typescript
+dependsOn:
+  - widget
+
+tasks:
+  build:
+    command: pnpm
+    args: ["build"]
+    deps:
+      - widget:build
+  dev:
+    command: pnpm
+    args: ["dev"]
+  lint:
+    command: pnpm
+    args: ["lint"]
+  test:
+    command: pnpm
+    args: ["test"]
+  typecheck:
+    command: pnpm
+    args: ["typecheck"]

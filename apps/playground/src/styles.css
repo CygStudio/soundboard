@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+@source "./**/*.{ts,vue}";
+@source "../../../packages/ui/src/**/*.{ts,vue}";
+@source "../../../packages/widget/src/**/*.{ts,vue}";

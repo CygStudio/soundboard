@@ -1,0 +1,35 @@
+{
+  "name": "soundboard",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "build": "moon run :build",
+    "dev": "moon run playground:dev",
+    "lint": "moon run :lint",
+    "test": "moon run :test",
+    "typecheck": "moon run :typecheck"
+  },
+  "devDependencies": {
+    "@moonrepo/cli": "^2.2.4",
+    "@tailwindcss/cli": "^4.2.4",
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^24.12.2",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.9.1",
+    "clsx": "^2.1.1",
+    "jsdom": "^29.1.1",
+    "oxlint": "^1.62.0",
+    "rolldown": "^1.0.0-rc.18",
+    "rolldown-plugin-dts": "^0.24.1",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.4",
+    "typescript": "~6.0.2",
+    "unplugin-vue": "^7.2.0",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5",
+    "vue": "^3.5.32",
+    "vue-tsc": "^3.2.7"
+  }
+}
