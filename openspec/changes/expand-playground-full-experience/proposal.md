@@ -1,14 +1,14 @@
 ## Why
 
-目前的 `apps/playground` 只驗證最小的 widget 掛載能力，還沒有承接設計稿中的完整頁面層互動、內容編排與展示情境，也仍使用範例 URL 而非實際可播放的音檔。現在補齊這一層，才能把 playground 從工程驗證頁升級成對齊設計稿、可真實展示產品體驗的開發與驗收表面。
+目前的 `apps/playground` 只驗證最小的 widget 掛載能力，還沒有承接設計稿中的完整頁面層互動、內容編排與多 variant 展示情境，也仍使用 placeholder URL 而非實際可播放的音檔。現在補齊這一層，才能把 playground 從工程驗證頁升級成對齊設計稿、可真實展示產品體驗的開發與驗收表面。
 
 ## What Changes
 
-- 擴充 `apps/playground`，使其支援設計稿中的完整 desktop 體驗，而不只是一個 widget 掛載示範區。
-- 將頁面內容從最小技術 demo 提升為完整 showcase，包含對應的版面結構、內容區塊、互動流程與 widget 嵌入情境。
-- 新增一組可隨專案一起管理的範例實際音檔，供 playground 與 widget 播放，不再使用程式化音頻模擬或不可用的 placeholder URL。
-- 定義範例音檔的來源、格式、命名、載入方式與版權/使用約束，讓本機開發與後續展示有穩定素材。
-- 補齊必要的驗證與文件，確保 playground 的完整體驗與真實音檔資產能穩定整合進現有 monorepo。
+- 擴充 `apps/playground`，使其支援設計稿中的完整 desktop 體驗，並可在同一頁切換目前納入的 Stitch variants。
+- 將頁面內容從最小技術 demo 提升為完整 showcase，包含對應的版面結構、內容區塊、互動流程，以及由同一份 variant-aware 資料驅動的 widget 嵌入情境。
+- 擴充 `packages/core`、`packages/ui` 與 `packages/widget` 的共享播放控制，支援 overlap、loop、random 與 stop-all，並維持 Vue 元件入口與 Shadow DOM 掛載入口的功能對齊。
+- 將 `docs/sounds/` 作為範例音檔的來源目錄，挑選本次需要的音檔後複製到 `apps/playground` 的穩定靜態資產路徑，供 playground 與 widget 播放。
+- 補齊必要的驗證與文件，確保 playground 的完整體驗、共享播放控制與真實音檔資產能穩定整合進現有 monorepo。
 
 ## Non-goals
 
@@ -25,11 +25,11 @@
 
 ### Modified Capabilities
 
-- 無。
+- `soundboard-widget`: 擴充 widget 的共享播放控制與展示 metadata 承接能力，讓 Vue 與 Shadow DOM 兩種入口都能支援同一套進階播放互動。
 
 ## Impact
 
-- 主要影響 `apps/playground` 的頁面組裝、內容資料、靜態資產與開發體驗。
-- 可能需要調整 `packages/core`、`packages/widget` 的資料模型與播放整合表面，以承接更完整的展示需求。
-- 會新增可提交到 repo 的範例音檔與相關 metadata / 引用方式。
+- 主要影響 `apps/playground` 的頁面組裝、variant-aware 展示資料、靜態資產與開發體驗。
+- 需要調整 `packages/core`、`packages/ui`、`packages/widget` 的資料模型、呈現層與播放整合表面，以承接共享播放控制與更完整的展示需求。
+- `docs/sounds/` 會成為範例音檔的來源集合，而 playground 會使用複製後的 app-local 靜態資產與相關 metadata / 引用方式。
 - 需要持續對齊 Stitch 設計稿，必要時使用 Stitch MCP 讀取畫面內容與結構。

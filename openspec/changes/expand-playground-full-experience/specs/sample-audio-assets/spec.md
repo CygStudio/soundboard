@@ -7,12 +7,19 @@
 - **WHEN** 使用者點擊任一音效項目
 - **THEN** 系統會播放對應的實際音訊檔案，而不是播放程式化模擬音訊或連到不存在的外部資源
 
+### Requirement: `docs/sounds/` 作為來源，playground 使用複製後的 app-local 音檔資產
+系統 SHALL 以 `docs/sounds/` 作為本次範例音檔的來源集合，並將實際供 `apps/playground` 使用的音檔複製到 app 的穩定靜態資產路徑，而不是在 runtime 直接引用 `docs/` 目錄。
+
+#### Scenario: 開發者更新本次範例音檔集合
+- **WHEN** 開發者為 playground 選定新的範例音檔
+- **THEN** 來源檔案會先在 `docs/sounds/` 中被盤點，再複製到 `apps/playground` 的靜態資產路徑供頁面與 widget 引用
+
 ### Requirement: 範例音檔資產必須有穩定的資料契約與引用方式
 系統 SHALL 為每個範例音檔提供穩定的檔名、路徑與對應 metadata，讓頁面展示資料與 widget 輸入都能可靠引用。
 
 #### Scenario: 開發者替換或新增範例音檔
 - **WHEN** 開發者更新範例音檔集合
-- **THEN** 可以透過明確資料欄位與靜態路徑完成替換，而不需要修改播放核心邏輯
+- **THEN** 可以透過明確資料欄位與 `apps/playground` 內的靜態路徑完成替換，而不需要修改播放核心邏輯
 
 ### Requirement: 範例音檔集合應控制在展示所需的最小範圍
 系統 MUST 只提交支撐設計稿與 playground 展示所需的最小音檔集合，以降低 repo 體積與維護負擔。
