@@ -8,6 +8,7 @@ export interface SoundboardItem {
   categoryId: string;
   title: string;
   audioUrl: string;
+  badge?: string;
   description?: string;
 }
 
@@ -20,7 +21,9 @@ export interface SoundboardInput {
 
 export interface SoundboardState {
   activeCategoryId: string | null;
-  activeItemId: string | null;
+  activeItemIds: string[];
+  allowOverlap: boolean;
+  loopEnabled: boolean;
   visibleItems: SoundboardItem[];
 }
 
@@ -51,21 +54,21 @@ function resolveInitialCategoryId(input: SoundboardInput) {
   return input.categories[0]?.id ?? null;
 }
 
-function resolveInitialActiveItemId(
+function resolveInitialActiveItemIds(
   input: SoundboardInput,
   activeCategoryId: string | null,
 ) {
   if (input.initialActiveItemId === undefined) {
-    return null;
+    return [];
   }
 
   const initialItem = getItemById(input, input.initialActiveItemId);
 
   if (initialItem === null || initialItem.categoryId !== activeCategoryId) {
-    return null;
+    return [];
   }
 
-  return initialItem.id;
+  return [initialItem.id];
 }
 
 function ensureCategoryExists(input: SoundboardInput, categoryId: string) {
@@ -93,7 +96,9 @@ export function createSoundboardState(input: SoundboardInput): SoundboardState {
 
   return {
     activeCategoryId,
-    activeItemId: resolveInitialActiveItemId(input, activeCategoryId),
+    activeItemIds: resolveInitialActiveItemIds(input, activeCategoryId),
+    allowOverlap: false,
+    loopEnabled: false,
     visibleItems: getVisibleItems(input, activeCategoryId),
   };
 }
@@ -106,13 +111,16 @@ export function selectSoundboardCategory(
   ensureCategoryExists(input, categoryId);
 
   const visibleItems = getVisibleItems(input, categoryId);
-  const activeItemStillVisible = visibleItems.some(
-    (item) => item.id === state.activeItemId,
+  const visibleItemIds = new Set(visibleItems.map((item) => item.id));
+  const activeItemIds = state.activeItemIds.filter((itemId) =>
+    visibleItemIds.has(itemId),
   );
 
   return {
     activeCategoryId: categoryId,
-    activeItemId: activeItemStillVisible ? state.activeItemId : null,
+    activeItemIds,
+    allowOverlap: state.allowOverlap,
+    loopEnabled: state.loopEnabled,
     visibleItems,
   };
 }
@@ -124,9 +132,98 @@ export function toggleActiveSound(
 ): SoundboardState {
   ensureVisibleItemExists(input, state.activeCategoryId, itemId);
 
+  const isActive = state.activeItemIds.includes(itemId);
+
+  if (isActive) {
+    return {
+      activeCategoryId: state.activeCategoryId,
+      activeItemIds: state.activeItemIds.filter((activeItemId) => activeItemId !== itemId),
+      allowOverlap: state.allowOverlap,
+      loopEnabled: state.loopEnabled,
+      visibleItems: state.visibleItems,
+    };
+  }
+
   return {
     activeCategoryId: state.activeCategoryId,
-    activeItemId: state.activeItemId === itemId ? null : itemId,
+    activeItemIds: state.allowOverlap ? [...state.activeItemIds, itemId] : [itemId],
+    allowOverlap: state.allowOverlap,
+    loopEnabled: state.loopEnabled,
+    visibleItems: state.visibleItems,
+  };
+}
+
+export function toggleOverlapPlayback(state: SoundboardState): SoundboardState {
+  const allowOverlap = !state.allowOverlap;
+
+  return {
+    activeCategoryId: state.activeCategoryId,
+    activeItemIds:
+      allowOverlap || state.activeItemIds.length <= 1
+        ? state.activeItemIds
+        : state.activeItemIds.slice(-1),
+    allowOverlap,
+    loopEnabled: state.loopEnabled,
+    visibleItems: state.visibleItems,
+  };
+}
+
+export function toggleLoopPlayback(state: SoundboardState): SoundboardState {
+  return {
+    activeCategoryId: state.activeCategoryId,
+    activeItemIds: state.activeItemIds,
+    allowOverlap: state.allowOverlap,
+    loopEnabled: !state.loopEnabled,
+    visibleItems: state.visibleItems,
+  };
+}
+
+export function activateRandomSound(
+  input: SoundboardInput,
+  state: SoundboardState,
+  randomValue = Math.random(),
+): SoundboardState {
+  if (state.visibleItems.length === 0) {
+    throw new Error("No visible items available for random playback");
+  }
+
+  const clampedRandomValue = Math.min(Math.max(randomValue, 0), 0.999999999999);
+  const randomIndex = Math.floor(clampedRandomValue * state.visibleItems.length);
+  const randomItemId = state.visibleItems[randomIndex]?.id;
+
+  if (randomItemId === undefined) {
+    throw new Error("Unable to resolve random sound item");
+  }
+
+  ensureVisibleItemExists(input, state.activeCategoryId, randomItemId);
+
+  if (state.allowOverlap) {
+    return {
+      activeCategoryId: state.activeCategoryId,
+      activeItemIds: state.activeItemIds.includes(randomItemId)
+        ? state.activeItemIds
+        : [...state.activeItemIds, randomItemId],
+      allowOverlap: state.allowOverlap,
+      loopEnabled: state.loopEnabled,
+      visibleItems: state.visibleItems,
+    };
+  }
+
+  return {
+    activeCategoryId: state.activeCategoryId,
+    activeItemIds: [randomItemId],
+    allowOverlap: state.allowOverlap,
+    loopEnabled: state.loopEnabled,
+    visibleItems: state.visibleItems,
+  };
+}
+
+export function stopAllSounds(state: SoundboardState): SoundboardState {
+  return {
+    activeCategoryId: state.activeCategoryId,
+    activeItemIds: [],
+    allowOverlap: state.allowOverlap,
+    loopEnabled: state.loopEnabled,
     visibleItems: state.visibleItems,
   };
 }

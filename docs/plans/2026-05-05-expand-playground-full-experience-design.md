@@ -80,6 +80,13 @@ Sample audio files will be committed as local static assets under a stable path 
 2. Widget interaction tests for overlap, loop, random, stop-all, category changes, and playback reset behavior.
 3. Asset integration checks that verify sample audio references resolve in both dev and build flows.
 
+## Follow-up polish backlog
+
+- Add more Stitch-inspired variants once additional approved layouts or narrative directions are ready.
+- Introduce richer card visuals (cover art, thumbnails, accent treatments) if the shared widget metadata contract needs them.
+- Refine hero illustration and supporting decorative treatments without moving page-shell concerns into shared packages.
+- Explore multi-widget or cross-surface playback coordination only as a separate follow-up change.
+
 ## Implementation notes
 
 - Prefer extending existing `packages/core`, `packages/ui`, and `packages/widget` types and components rather than introducing a second playback system in `apps/playground`.

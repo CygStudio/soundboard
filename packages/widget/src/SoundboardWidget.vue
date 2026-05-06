@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import {
+  activateRandomSound,
   createSoundboardState,
   selectSoundboardCategory,
+  stopAllSounds,
+  toggleLoopPlayback,
+  toggleOverlapPlayback,
   toggleActiveSound,
 } from "@soundboard/core";
-import { CategoryTabs, SoundItemCard, cn } from "@soundboard/ui";
+import { CategoryTabs, PlaybackControls, SoundItemCard, cn } from "@soundboard/ui";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
-import type { SoundboardItem } from "@soundboard/core";
+import type { SoundboardItem, SoundboardState } from "@soundboard/core";
 import type { SoundboardWidgetProps } from "./types";
 
 defineOptions({
@@ -19,26 +23,38 @@ const props = withDefaults(defineProps<SoundboardWidgetProps>(), {
 });
 
 const state = ref(createSoundboardState(props.soundboard));
-
-let activeAudio: HTMLAudioElement | null = null;
+const activeAudioByItemId = new Map<string, HTMLAudioElement>();
 
 const categories = computed(() => props.soundboard.categories);
+const canStopAll = computed(() => state.value.activeItemIds.length > 0);
 const visibleItems = computed(() => state.value.visibleItems);
 
-function disposeAudio() {
-  if (activeAudio === null) {
+function stopAudio(itemId: string) {
+  const audio = activeAudioByItemId.get(itemId);
+
+  if (audio === undefined) {
     return;
   }
 
-  activeAudio.pause();
-  activeAudio.currentTime = 0;
-  activeAudio = null;
+  audio.pause();
+  audio.currentTime = 0;
+  activeAudioByItemId.delete(itemId);
 }
 
-function clearActiveItem() {
+function stopAudioSet(itemIds: readonly string[]) {
+  for (const itemId of itemIds) {
+    stopAudio(itemId);
+  }
+}
+
+function stopAllPlayback() {
+  stopAudioSet([...activeAudioByItemId.keys()]);
+}
+
+function clearActiveItem(itemId: string) {
   state.value = {
     ...state.value,
-    activeItemId: null,
+    activeItemIds: state.value.activeItemIds.filter((activeItemId) => activeItemId !== itemId),
   };
 }
 
@@ -53,35 +69,23 @@ function findItem(itemId: string) {
 }
 
 function handlePlaybackSettled(itemId: string) {
-  if (state.value.activeItemId === itemId) {
-    clearActiveItem();
-  }
+  activeAudioByItemId.delete(itemId);
 
-  activeAudio = null;
+  if (state.value.activeItemIds.includes(itemId)) {
+    clearActiveItem(itemId);
+  }
 }
 
-function handleCategoryChange(categoryId: string) {
-  if (categoryId === state.value.activeCategoryId) {
-    return;
+function syncLoopState(loopEnabled: boolean) {
+  for (const audio of activeAudioByItemId.values()) {
+    audio.loop = loopEnabled;
   }
-
-  disposeAudio();
-  state.value = selectSoundboardCategory(props.soundboard, state.value, categoryId);
 }
 
-async function handleTogglePlay(item: SoundboardItem) {
-  const nextState = toggleActiveSound(props.soundboard, state.value, item.id);
-
-  if (nextState.activeItemId === null) {
-    disposeAudio();
-    state.value = nextState;
-    return;
-  }
-
-  disposeAudio();
-  state.value = nextState;
-
+async function startAudio(item: SoundboardItem, loopEnabled: boolean) {
   const nextAudio = new Audio(item.audioUrl);
+
+  nextAudio.loop = loopEnabled;
   nextAudio.addEventListener("ended", () => {
     handlePlaybackSettled(item.id);
   });
@@ -89,27 +93,78 @@ async function handleTogglePlay(item: SoundboardItem) {
     handlePlaybackSettled(item.id);
   });
 
-  activeAudio = nextAudio;
+  activeAudioByItemId.set(item.id, nextAudio);
 
   try {
     await nextAudio.play();
-  } catch {
-    disposeAudio();
-    clearActiveItem();
+  } catch (error) {
+    console.error("Failed to play soundboard audio", error);
+    stopAudio(item.id);
+    clearActiveItem(item.id);
   }
+}
+
+async function applyStateTransition(nextState: SoundboardState) {
+  const previousActiveItemIds = new Set(state.value.activeItemIds);
+  const nextActiveItemIds = new Set(nextState.activeItemIds);
+
+  stopAudioSet(
+    state.value.activeItemIds.filter((itemId) => !nextActiveItemIds.has(itemId)),
+  );
+
+  state.value = nextState;
+  syncLoopState(state.value.loopEnabled);
+
+  for (const itemId of nextState.activeItemIds) {
+    if (previousActiveItemIds.has(itemId)) {
+      continue;
+    }
+
+    await startAudio(findItem(itemId), state.value.loopEnabled);
+  }
+}
+
+async function handleCategoryChange(categoryId: string) {
+  if (categoryId === state.value.activeCategoryId) {
+    return;
+  }
+
+  await applyStateTransition(
+    selectSoundboardCategory(props.soundboard, state.value, categoryId),
+  );
+}
+
+async function handleTogglePlay(item: SoundboardItem) {
+  await applyStateTransition(toggleActiveSound(props.soundboard, state.value, item.id));
+}
+
+async function handleToggleOverlap() {
+  await applyStateTransition(toggleOverlapPlayback(state.value));
+}
+
+async function handleToggleLoop() {
+  await applyStateTransition(toggleLoopPlayback(state.value));
+}
+
+async function handlePlayRandom() {
+  await applyStateTransition(activateRandomSound(props.soundboard, state.value));
+}
+
+async function handleStopAll() {
+  await applyStateTransition(stopAllSounds(state.value));
 }
 
 watch(
   () => props.soundboard,
   () => {
-    disposeAudio();
+    stopAllPlayback();
     state.value = createSoundboardState(props.soundboard);
   },
   { deep: true },
 );
 
 onBeforeUnmount(() => {
-  disposeAudio();
+  stopAllPlayback();
 });
 </script>
 
@@ -137,11 +192,21 @@ onBeforeUnmount(() => {
       @category-change="handleCategoryChange"
     />
 
+    <PlaybackControls
+      :allow-overlap="state.allowOverlap"
+      :can-stop-all="canStopAll"
+      :loop-enabled="state.loopEnabled"
+      @play-random="handlePlayRandom"
+      @stop-all="handleStopAll"
+      @toggle-loop="handleToggleLoop"
+      @toggle-overlap="handleToggleOverlap"
+    />
+
     <div class="grid gap-4 md:grid-cols-2">
       <SoundItemCard
         v-for="item in visibleItems"
         :key="item.id"
-        :is-active="item.id === state.activeItemId"
+        :is-active="state.activeItemIds.includes(item.id)"
         :item="item"
         @toggle-play="handleTogglePlay(findItem($event))"
       />

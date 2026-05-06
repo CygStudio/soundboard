@@ -34,14 +34,20 @@ const emit = defineEmits<{
         props.className,
       )
     "
-  >
-    <div class="flex items-start justify-between gap-4">
-      <div class="space-y-2">
-        <h3 class="text-base font-semibold text-white">
-          {{ props.item.title }}
-        </h3>
-        <p
-          v-if="props.item.description"
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div class="space-y-2">
+          <p
+            v-if="props.item.badge"
+            class="text-xs font-medium uppercase tracking-[0.22em] text-cyan-300"
+          >
+            {{ props.item.badge }}
+          </p>
+          <h3 class="text-base font-semibold text-white">
+            {{ props.item.title }}
+          </h3>
+          <p
+            v-if="props.item.description"
           class="text-sm leading-6 text-slate-300"
         >
           {{ props.item.description }}
