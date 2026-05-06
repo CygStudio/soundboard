@@ -5,7 +5,8 @@
   "type": "module",
   "dependencies": {
     "@soundboard/widget": "workspace:*",
-    "vue": "^3.5.32"
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.6"
   },
   "scripts": {
     "build": "vite build",

@@ -1,11 +1,11 @@
 import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 
-import App from "../src/App.vue";
+import PlaygroundPage from "../src/pages/PlaygroundPage.vue";
 
 describe("playground app", () => {
   test("switches variants and keeps Vue and Shadow DOM widgets in sync", async () => {
-    const wrapper = mount(App);
+    const wrapper = mount(PlaygroundPage);
 
     expect(wrapper.text()).toContain("Streamer Mode");
     expect(wrapper.text()).toContain("Meow Hello");

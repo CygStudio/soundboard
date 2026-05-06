@@ -3,3 +3,52 @@
 @source "./**/*.{ts,vue}";
 @source "../../../packages/ui/src/**/*.{ts,vue}";
 @source "../../../packages/widget/src/**/*.{ts,vue}";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-henya-primary: #b19cd9;
+  --color-henya-secondary: #ffb6c1;
+  --color-henya-accent: #4b0082;
+  --color-henya-bg-light: #fdf8ff;
+  --color-henya-bg-dark: #1a1025;
+  --font-henya-display: "Nunito", sans-serif;
+  --font-henya-body: "Quicksand", sans-serif;
+}
+
+.henya-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.henya-bounce-hover {
+  transition: transform 200ms ease;
+}
+.henya-bounce-hover:hover {
+  transform: translateY(-4px);
+}
+
+.henya-playing-card {
+  box-shadow:
+    0 10px 25px -5px rgba(177, 156, 217, 0.3),
+    0 8px 10px -6px rgba(177, 156, 217, 0.1);
+}
+
+.henya-diamond-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0L20 10L10 20L0 10Z' fill='%23B19CD9' fill-opacity='0.1'/%3E%3C/svg%3E");
+}
+
+@keyframes henya-pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+.henya-animate-pulse-soft {
+  animation: henya-pulse-soft 2s infinite ease-in-out;
+}
