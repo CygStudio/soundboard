@@ -9,9 +9,12 @@ import {
 } from "../showcase/henyaSoundboard";
 
 interface ActivePlayback {
+  readonly id: number;
   readonly audio: HTMLAudioElement;
   readonly itemId: string;
 }
+
+let nextPlaybackId = 0;
 
 const activeCategoryId = ref<string>(HENYA_ALL_CATEGORY_ID);
 const allowOverlap = ref(false);
@@ -21,6 +24,7 @@ const playbacks = ref<readonly ActivePlayback[]>([]);
 const progressByItemId = ref<Record<string, number>>({});
 const currentTimeByItemId = ref<Record<string, number>>({});
 const durationByItemId = ref<Record<string, number>>({});
+const latestPlaybackIdByItemId = ref<Record<string, number>>({});
 
 const visibleItems = computed<readonly HenyaSoundItem[]>(() => {
   if (activeCategoryId.value === HENYA_ALL_CATEGORY_ID) {
@@ -32,14 +36,6 @@ const visibleItems = computed<readonly HenyaSoundItem[]>(() => {
 const activeItemIds = computed(() => new Set(playbacks.value.map((entry) => entry.itemId)));
 const canStopAll = computed(() => playbacks.value.length > 0);
 
-function findItem(itemId: string): HenyaSoundItem {
-  const item = henyaSoundItems.find((entry) => entry.id === itemId);
-  if (item === undefined) {
-    throw new Error(`Unknown henya sound item id: ${itemId}`);
-  }
-  return item;
-}
-
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) {
     return "0:00";
@@ -50,16 +46,64 @@ function formatTime(seconds: number): string {
   return `${minutes}:${remaining.toString().padStart(2, "0")}`;
 }
 
-function stopPlayback(itemId: string) {
-  const entry = playbacks.value.find((playback) => playback.itemId === itemId);
+function removeNumberKey(source: Record<string, number>, key: string): Record<string, number> {
+  const next = { ...source };
+  delete next[key];
+  return next;
+}
+
+function resetItemState(itemId: string) {
+  progressByItemId.value = removeNumberKey(progressByItemId.value, itemId);
+  currentTimeByItemId.value = removeNumberKey(currentTimeByItemId.value, itemId);
+  latestPlaybackIdByItemId.value = removeNumberKey(latestPlaybackIdByItemId.value, itemId);
+}
+
+function syncItemPlaybackState(itemId: string) {
+  const remaining = playbacks.value.filter((playback) => playback.itemId === itemId);
+  const latest = remaining[remaining.length - 1];
+
+  if (latest === undefined) {
+    resetItemState(itemId);
+    return;
+  }
+
+  latestPlaybackIdByItemId.value = {
+    ...latestPlaybackIdByItemId.value,
+    [itemId]: latest.id,
+  };
+  currentTimeByItemId.value = {
+    ...currentTimeByItemId.value,
+    [itemId]: latest.audio.currentTime,
+  };
+
+  const duration = latest.audio.duration;
+  if (Number.isFinite(duration) && duration > 0) {
+    progressByItemId.value = {
+      ...progressByItemId.value,
+      [itemId]: Math.min(1, latest.audio.currentTime / duration),
+    };
+  }
+}
+
+function stopPlayback(playbackId: number) {
+  const entry = playbacks.value.find((playback) => playback.id === playbackId);
   if (entry === undefined) {
     return;
   }
   entry.audio.pause();
   entry.audio.currentTime = 0;
+  playbacks.value = playbacks.value.filter((playback) => playback.id !== playbackId);
+  syncItemPlaybackState(entry.itemId);
+}
+
+function stopItemPlaybacks(itemId: string) {
+  const matchingEntries = playbacks.value.filter((playback) => playback.itemId === itemId);
+  for (const entry of matchingEntries) {
+    entry.audio.pause();
+    entry.audio.currentTime = 0;
+  }
   playbacks.value = playbacks.value.filter((playback) => playback.itemId !== itemId);
-  delete progressByItemId.value[itemId];
-  delete currentTimeByItemId.value[itemId];
+  resetItemState(itemId);
 }
 
 function stopAllPlaybacks() {
@@ -70,9 +114,10 @@ function stopAllPlaybacks() {
   playbacks.value = [];
   progressByItemId.value = {};
   currentTimeByItemId.value = {};
+  latestPlaybackIdByItemId.value = {};
 }
 
-function attachAudioListeners(audio: HTMLAudioElement, item: HenyaSoundItem) {
+function attachAudioListeners(audio: HTMLAudioElement, item: HenyaSoundItem, playbackId: number) {
   audio.loop = loopEnabled.value;
   audio.addEventListener("loadedmetadata", () => {
     durationByItemId.value = {
@@ -81,6 +126,9 @@ function attachAudioListeners(audio: HTMLAudioElement, item: HenyaSoundItem) {
     };
   });
   audio.addEventListener("timeupdate", () => {
+    if (latestPlaybackIdByItemId.value[item.id] !== playbackId) {
+      return;
+    }
     const duration = audio.duration;
     currentTimeByItemId.value = {
       ...currentTimeByItemId.value,
@@ -95,11 +143,11 @@ function attachAudioListeners(audio: HTMLAudioElement, item: HenyaSoundItem) {
   });
   audio.addEventListener("ended", () => {
     if (!audio.loop) {
-      stopPlayback(item.id);
+      stopPlayback(playbackId);
     }
   });
   audio.addEventListener("error", () => {
-    stopPlayback(item.id);
+    stopPlayback(playbackId);
   });
 }
 
@@ -107,23 +155,37 @@ async function startPlayback(item: HenyaSoundItem) {
   if (!allowOverlap.value) {
     stopAllPlaybacks();
   }
+  const playbackId = nextPlaybackId;
+  nextPlaybackId += 1;
   const audio = new Audio(item.audioUrl);
-  attachAudioListeners(audio, item);
-  playbacks.value = [...playbacks.value, { audio, itemId: item.id }];
+  attachAudioListeners(audio, item, playbackId);
+  latestPlaybackIdByItemId.value = {
+    ...latestPlaybackIdByItemId.value,
+    [item.id]: playbackId,
+  };
+  currentTimeByItemId.value = {
+    ...currentTimeByItemId.value,
+    [item.id]: 0,
+  };
+  progressByItemId.value = {
+    ...progressByItemId.value,
+    [item.id]: 0,
+  };
+  playbacks.value = [...playbacks.value, { id: playbackId, audio, itemId: item.id }];
   try {
     await audio.play();
   } catch (error) {
     console.error("Failed to play henya soundboard audio", error);
-    stopPlayback(item.id);
+    stopPlayback(playbackId);
   }
 }
 
-async function handleToggleSound(item: HenyaSoundItem) {
-  if (activeItemIds.value.has(item.id)) {
-    stopPlayback(item.id);
-    return;
-  }
+async function handlePlaySound(item: HenyaSoundItem) {
   await startPlayback(item);
+}
+
+function handleStopSound(itemId: string) {
+  stopItemPlaybacks(itemId);
 }
 
 function handleSelectCategory(categoryId: string) {
@@ -139,7 +201,7 @@ function handleSelectCategory(categoryId: string) {
   );
   for (const entry of [...playbacks.value]) {
     if (!visibleIds.has(entry.itemId)) {
-      stopPlayback(entry.itemId);
+      stopItemPlaybacks(entry.itemId);
     }
   }
 }
@@ -151,9 +213,9 @@ function handleToggleOverlap() {
     if (keep === undefined) {
       return;
     }
-    for (const entry of playbacks.value) {
-      if (entry.itemId !== keep.itemId) {
-        stopPlayback(entry.itemId);
+    for (const entry of [...playbacks.value]) {
+      if (entry.id !== keep.id) {
+        stopPlayback(entry.id);
       }
     }
   }
@@ -174,12 +236,6 @@ async function handleShuffle() {
   const target = visibleItems.value[randomIndex];
   if (target === undefined) {
     return;
-  }
-  if (activeItemIds.value.has(target.id) && !allowOverlap.value) {
-    return;
-  }
-  if (activeItemIds.value.has(target.id) && allowOverlap.value) {
-    stopPlayback(target.id);
   }
   await startPlayback(target);
 }
@@ -392,11 +448,10 @@ function timeLabelFor(item: HenyaSoundItem): string {
         v-else
         class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
       >
-        <button
+        <article
           v-for="item in visibleItems"
           :key="item.id"
-          type="button"
-          :aria-pressed="activeItemIds.has(item.id)"
+          :data-henya-sound-id="item.id"
           :class="[
             'group relative backdrop-blur-md rounded-2xl p-4 henya-bounce-hover overflow-hidden text-left flex flex-col justify-between h-32',
             activeItemIds.has(item.id)
@@ -411,8 +466,15 @@ function timeLabelFor(item: HenyaSoundItem): string {
                     : 'bg-white/70 border-white/50',
                 ],
           ]"
-          @click="handleToggleSound(item)"
         >
+          <button
+            type="button"
+            :aria-label="`Play ${item.title}`"
+            :aria-pressed="activeItemIds.has(item.id)"
+            :data-henya-play-id="item.id"
+            class="absolute inset-0 z-20 cursor-pointer rounded-2xl border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-henya-primary/40"
+            @click="handlePlaySound(item)"
+          />
           <div
             v-if="!activeItemIds.has(item.id)"
             class="absolute inset-0 bg-gradient-to-br from-henya-primary/0 to-henya-primary/0 group-hover:from-henya-primary/10 group-hover:to-henya-secondary/10 transition-all duration-300"
@@ -449,12 +511,16 @@ function timeLabelFor(item: HenyaSoundItem): string {
             >
               {{ timeLabelFor(item) }}
             </span>
-            <div
+            <button
               v-if="activeItemIds.has(item.id)"
-              class="bg-henya-primary w-10 h-10 flex items-center justify-center rounded-full text-white shadow-md shadow-henya-primary/30 transition-transform group-hover:scale-110"
+              type="button"
+              :aria-label="`Stop ${item.title}`"
+              :data-henya-stop-id="item.id"
+              class="relative z-30 bg-henya-primary w-10 h-10 flex items-center justify-center rounded-full text-white shadow-md shadow-henya-primary/30 transition-transform group-hover:scale-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-henya-primary/40"
+              @click="handleStopSound(item.id)"
             >
               <span class="material-icons-round text-base">stop</span>
-            </div>
+            </button>
           </div>
           <div
             v-if="activeItemIds.has(item.id)"
@@ -466,7 +532,7 @@ function timeLabelFor(item: HenyaSoundItem): string {
             v-else
             class="absolute bottom-0 left-0 h-1 bg-henya-primary w-0 group-hover:w-full transition-all duration-500 ease-out"
           />
-        </button>
+        </article>
       </div>
     </main>
 
