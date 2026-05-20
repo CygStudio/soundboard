@@ -77,7 +77,7 @@ const heroStats = computed<readonly HeroStat[]>(() => [
 ]);
 
 const activeCategoryLabel = computed(() => {
-  return cygCategoryOptions.find((category) => category.id === activeCategoryId.value)?.label ?? "全部龍焰";
+  return cygCategoryOptions.find((category) => category.id === activeCategoryId.value)?.label ?? "全部音效";
 });
 
 function matchesSearch(item: CygSoundItem, query: string): boolean {

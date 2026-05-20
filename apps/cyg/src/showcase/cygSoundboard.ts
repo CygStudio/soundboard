@@ -48,7 +48,7 @@ export const cygBaseCategories = cygSourceData.categories.map((category) => ({ .
 export const cygCategoryOptions: readonly CygCategoryOption[] = [
   {
     id: CYG_ALL_CATEGORY_ID,
-    label: "全部龍焰",
+    label: "全部音效",
     itemCount: cygSourceData.items.length,
   },
   ...cygBaseCategories.map((category) => ({
