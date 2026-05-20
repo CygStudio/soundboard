@@ -6,7 +6,6 @@ import {
   cygCategoryOptions,
   cygSoundItems,
   cygSummary,
-  cygTopCategories,
   type CygSoundItem,
 } from "../showcase/cygSoundboard";
 
@@ -26,6 +25,11 @@ interface FestiveAccent {
 interface HeroStat {
   readonly label: string;
   readonly value: string;
+}
+
+interface HeroCredit {
+  readonly title: string;
+  readonly people: string;
 }
 
 let nextPlaybackId = 0;
@@ -75,6 +79,12 @@ const heroStats = computed<readonly HeroStat[]>(() => [
   { label: "分類", value: `${cygSummary.totalCategories}` },
   // { label: "有子標籤", value: `${cygSummary.taggedItems}` },
 ]);
+
+const heroCredits: readonly HeroCredit[] = [
+  { title: "企劃發起", people: "DJ DÄZEE" },
+  { title: "技術負責、音訊處理", people: "排氣管管、DJ DÄZEE" },
+  { title: "片段收集", people: "維、Eden、シュ婚叫セン、黑矸仔裝豆油" },
+];
 
 const activeCategoryLabel = computed(() => {
   return cygCategoryOptions.find((category) => category.id === activeCategoryId.value)?.label ?? "全部音效";
@@ -450,9 +460,72 @@ function metaLabelFor(item: CygSoundItem): string {
     </nav>
 
     <header class="relative pt-32 pb-10 lg:pt-40 lg:pb-16 px-6 z-10">
-      <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12">
-        <div class="lg:w-1/2 text-center lg:text-left space-y-6">
+      <div class="max-w-6xl mx-auto flex flex-col items-center gap-10">
+
+
+        <div class="relative flex w-full justify-center">
+          <div class="absolute inset-0 bg-gradient-to-tr from-cyg-primary-container to-cyg-tertiary-container opacity-30 blur-[90px] rounded-full transform scale-75" />
           <div
+            :class="[
+              'relative z-10 w-full max-w-[52rem] rounded-[2rem] overflow-hidden flex flex-col justify-between p-8 shadow-2xl cyg-glass cyg-dragon-scale',
+              isDarkMode
+                ? 'bg-cyg-surface-container/70 border border-cyg-primary/20 shadow-cyg-primary-container/30'
+                : 'bg-cyg-primary-fixed/50 border border-cyg-outline/30 shadow-cyg-outline/20',
+            ]"
+          >
+            <!-- <div class="flex items-start justify-between">
+              <span
+                :class="[
+                  'rounded-full px-3 py-1 text-xs font-bold tracking-[0.14em] uppercase border',
+                  isDarkMode
+                    ? 'bg-cyg-primary-container/25 border-cyg-primary/20 text-cyg-primary'
+                    : 'bg-cyg-primary/10 border-cyg-inverse-primary/15 text-cyg-inverse-primary',
+                ]"
+              >
+                Live data
+              </span>
+              <span class="text-5xl cyg-animate-pulse-soft">🐉</span>
+            </div> -->
+
+            <div class="space-y-3">
+              <div
+                v-for="credit in heroCredits"
+                :key="credit.title"
+                :class="[
+                  'rounded-[1.25rem] px-4 py-3 border flex items-center justify-between',
+                  isDarkMode
+                    ? 'bg-cyg-surface-container-low/70 border-cyg-primary/12'
+                    : 'bg-cyg-inverse-surface/70 border-cyg-outline/18',
+                ]"
+              >
+                <div class="font-bold">
+                  {{ credit.title }}：<br />
+                  {{ credit.people }}
+                </div>
+                <!-- <div>
+                  <div class="font-bold">
+                    {{ category.label }}
+                  </div>
+                  <div
+                    :class="[
+                      'text-sm',
+                      isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
+                    ]"
+                  >
+                    主要分類片段
+                  </div>
+                </div>
+                <div class="text-2xl font-cyg-display font-extrabold text-cyg-primary">
+                  {{ category.itemCount }}
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+                <div class="w-full max-w-5xl text-center space-y-6">
+          <!-- <div
             :class="[
               'inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold mb-2 border cyg-glass',
               isDarkMode
@@ -462,7 +535,7 @@ function metaLabelFor(item: CygSoundItem): string {
           >
             <span class="material-icons-round text-sm mr-2 animate-pulse">auto_awesome</span>
             581 段片段
-          </div>
+          </div> -->
           <!-- <h1
             :class="[
               'font-cyg-display font-extrabold text-5xl lg:text-7xl leading-[1.1] tracking-[-0.02em]',
@@ -476,14 +549,14 @@ function metaLabelFor(item: CygSoundItem): string {
           </h1> -->
           <p
             :class="[
-              'text-lg max-w-xl mx-auto lg:mx-0 leading-[1.6]',
+              'text-lg max-w-5xl mx-auto leading-[1.6]',
               isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/75',
             ]"
           >
             把日常、叫聲、暴言到福利全部收錄在這裡，讓我們一起 088 ！
           </p>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div class="mx-auto grid max-w-3xl grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
             <div
               v-for="stat in heroStats"
               :key="stat.label"
@@ -506,89 +579,6 @@ function metaLabelFor(item: CygSoundItem): string {
                 {{ stat.label }}
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="lg:w-1/2 relative flex justify-center">
-          <div class="absolute inset-0 bg-gradient-to-tr from-cyg-primary-container to-cyg-tertiary-container opacity-30 blur-[90px] rounded-full transform scale-75" />
-          <div
-            :class="[
-              'relative z-10 w-[350px] lg:w-[450px] rounded-[2rem] overflow-hidden flex flex-col justify-between p-8 shadow-2xl cyg-glass cyg-dragon-scale',
-              isDarkMode
-                ? 'bg-cyg-surface-container/70 border border-cyg-primary/20 shadow-cyg-primary-container/30'
-                : 'bg-cyg-primary-fixed/50 border border-cyg-outline/30 shadow-cyg-outline/20',
-            ]"
-          >
-            <!-- <div class="flex items-start justify-between">
-              <span
-                :class="[
-                  'rounded-full px-3 py-1 text-xs font-bold tracking-[0.14em] uppercase border',
-                  isDarkMode
-                    ? 'bg-cyg-primary-container/25 border-cyg-primary/20 text-cyg-primary'
-                    : 'bg-cyg-primary/10 border-cyg-inverse-primary/15 text-cyg-inverse-primary',
-                ]"
-              >
-                Live data
-              </span>
-              <span class="text-5xl cyg-animate-pulse-soft">🐉</span>
-            </div> -->
-
-            <div class="space-y-3">
-              <div
-                v-for="(category, index) in cygTopCategories"
-                :key="category.id"
-                :class="[
-                  'rounded-[1.25rem] px-4 py-3 border flex items-center justify-between',
-                  isDarkMode
-                    ? 'bg-cyg-surface-container-low/70 border-cyg-primary/12'
-                    : 'bg-cyg-inverse-surface/70 border-cyg-outline/18',
-                ]"
-              >
-                <div class="font-bold" v-if="index === 0">
-                  企劃發起：<br/>
-                  DJ DÄZEE
-                </div>
-                <div class="font-bold" v-if="index === 1">
-                  技術負責、音訊處理：<br/>排氣管管、DJ DÄZEE
-                </div>
-                <div class="font-bold" v-if="index === 2">
-                  片段收集：<br/>維、Eden、シュ婚叫セン、歐咖吶哋島油
-                </div>
-                <!-- <div>
-                  <div class="font-bold">
-                    {{ category.label }}
-                  </div>
-                  <div
-                    :class="[
-                      'text-sm',
-                      isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
-                    ]"
-                  >
-                    主要分類片段
-                  </div>
-                </div>
-                <div class="text-2xl font-cyg-display font-extrabold text-cyg-primary">
-                  {{ category.itemCount }}
-                </div> -->
-              </div>
-            </div>
-          </div>
-
-          <div
-            :class="[
-              'absolute top-10 right-10 p-3 rounded-2xl shadow-xl rotate-12 animate-bounce hover:rotate-0 transition-all duration-300 cursor-pointer',
-              isDarkMode ? 'bg-cyg-surface-container-high text-cyg-primary' : 'bg-cyg-secondary-fixed text-cyg-on-secondary-fixed',
-            ]"
-          >
-            <span class="text-2xl">🎂</span>
-          </div>
-          <div
-            :class="[
-              'absolute bottom-20 left-0 p-3 rounded-2xl shadow-xl -rotate-6 hover:rotate-0 transition-all duration-300 cursor-pointer',
-              isDarkMode ? 'bg-cyg-surface-container-high text-cyg-tertiary' : 'bg-cyg-tertiary-fixed text-cyg-on-tertiary-fixed',
-            ]"
-          >
-            <span class="text-2xl">🎊</span>
           </div>
         </div>
       </div>
