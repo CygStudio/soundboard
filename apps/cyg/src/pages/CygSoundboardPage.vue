@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import {
   CYG_ALL_CATEGORY_ID,
-  cygCategories,
+  cygCategoryOptions,
   cygSoundItems,
+  cygSummary,
+  cygTopCategories,
   type CygSoundItem,
 } from "../showcase/cygSoundboard";
 
@@ -21,12 +23,18 @@ interface FestiveAccent {
   readonly style: string;
 }
 
+interface HeroStat {
+  readonly label: string;
+  readonly value: string;
+}
+
 let nextPlaybackId = 0;
 
 const activeCategoryId = ref<string>(CYG_ALL_CATEGORY_ID);
 const allowOverlap = ref(false);
 const loopEnabled = ref(false);
 const isDarkMode = ref(true);
+const searchQuery = ref("");
 const playbacks = ref<readonly ActivePlayback[]>([]);
 const progressByItemId = ref<Record<string, number>>({});
 const currentTimeByItemId = ref<Record<string, number>>({});
@@ -60,15 +68,43 @@ const festiveAccents: readonly FestiveAccent[] = [
   },
 ];
 
-const visibleItems = computed<readonly CygSoundItem[]>(() => {
-  if (activeCategoryId.value === CYG_ALL_CATEGORY_ID) {
-    return cygSoundItems;
+const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase());
+
+const heroStats = computed<readonly HeroStat[]>(() => [
+  { label: "音效總數", value: `${cygSummary.totalItems}` },
+  { label: "分類", value: `${cygSummary.totalCategories}` },
+  { label: "有子標籤", value: `${cygSummary.taggedItems}` },
+]);
+
+const activeCategoryLabel = computed(() => {
+  return cygCategoryOptions.find((category) => category.id === activeCategoryId.value)?.label ?? "全部龍焰";
+});
+
+function matchesSearch(item: CygSoundItem, query: string): boolean {
+  if (query.length === 0) {
+    return true;
   }
-  return cygSoundItems.filter((item) => item.categoryId === activeCategoryId.value);
+
+  return [item.title, item.subcategory ?? "", item.filename, item.id].some((value) =>
+    value.toLocaleLowerCase().includes(query),
+  );
+}
+
+const visibleItems = computed<readonly CygSoundItem[]>(() => {
+  const categoryFiltered =
+    activeCategoryId.value === CYG_ALL_CATEGORY_ID
+      ? cygSoundItems
+      : cygSoundItems.filter((item) => item.categoryId === activeCategoryId.value);
+
+  return categoryFiltered.filter((item) => matchesSearch(item, normalizedSearchQuery.value));
 });
 
 const activeItemIds = computed(() => new Set(playbacks.value.map((entry) => entry.itemId)));
 const canStopAll = computed(() => playbacks.value.length > 0);
+const visibleSummaryLabel = computed(() => {
+  const prefix = activeCategoryId.value === CYG_ALL_CATEGORY_ID ? "全部片段" : activeCategoryLabel.value;
+  return `${prefix} · ${visibleItems.value.length} / ${cygSummary.totalItems}`;
+});
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) {
@@ -227,17 +263,6 @@ function handleSelectCategory(categoryId: string) {
     return;
   }
   activeCategoryId.value = categoryId;
-  const visibleIds = new Set(
-    (categoryId === CYG_ALL_CATEGORY_ID
-      ? cygSoundItems
-      : cygSoundItems.filter((item) => item.categoryId === categoryId)
-    ).map((item) => item.id),
-  );
-  for (const entry of [...playbacks.value]) {
-    if (!visibleIds.has(entry.itemId)) {
-      stopItemPlaybacks(entry.itemId);
-    }
-  }
 }
 
 function handleToggleOverlap() {
@@ -282,15 +307,28 @@ function toggleDarkMode() {
   isDarkMode.value = !isDarkMode.value;
 }
 
+function clearSearch() {
+  searchQuery.value = "";
+}
+
 onBeforeUnmount(() => {
   stopAllPlaybacks();
+});
+
+watch(visibleItems, (items) => {
+  const visibleIds = new Set(items.map((item) => item.id));
+  for (const entry of [...playbacks.value]) {
+    if (!visibleIds.has(entry.itemId)) {
+      stopItemPlaybacks(entry.itemId);
+    }
+  }
 });
 
 function progressFor(itemId: string): number {
   return progressByItemId.value[itemId] ?? 0;
 }
 
-function timeLabelFor(item: CygSoundItem): string {
+function metaLabelFor(item: CygSoundItem): string {
   if (activeItemIds.value.has(item.id)) {
     const current = currentTimeByItemId.value[item.id] ?? 0;
     const duration = durationByItemId.value[item.id];
@@ -344,27 +382,38 @@ function timeLabelFor(item: CygSoundItem): string {
           <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-cyg-primary bg-gradient-to-br from-cyg-primary-container via-cyg-tertiary-container to-cyg-surface-container-high flex items-center justify-center shadow-lg shadow-cyg-primary-container/30">
             <span class="text-cyg-on-primary-container font-cyg-display font-extrabold text-lg">D</span>
           </div>
-          <span
-            :class="[
-              'font-cyg-display font-extrabold text-xl tracking-[-0.02em]',
-              isDarkMode ? 'text-cyg-primary' : 'text-cyg-inverse-primary',
-            ]"
-          >
-            Dragon Celebration
-          </span>
+          <div class="flex flex-col">
+            <span
+              :class="[
+                'font-cyg-display font-extrabold text-xl tracking-[-0.02em]',
+                isDarkMode ? 'text-cyg-primary' : 'text-cyg-inverse-primary',
+              ]"
+            >
+              Dragon Celebration System
+            </span>
+            <span
+              :class="[
+                'text-[11px] tracking-[0.18em] uppercase',
+                isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/60',
+              ]"
+            >
+              CYG Soundboard
+            </span>
+          </div>
         </div>
         <div class="hidden md:flex items-center space-x-6">
-          <a
-            v-for="link in ['Ritual', 'Clips', 'Party']"
-            :key="link"
+          <span
+            v-for="category in cygTopCategories"
+            :key="category.id"
             :class="[
-              'font-bold transition-colors hover:text-cyg-primary',
-              isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/70',
+              'rounded-full px-3 py-1 text-xs font-bold border',
+              isDarkMode
+                ? 'border-cyg-primary/20 bg-cyg-surface-container-high/70 text-cyg-on-surface-variant'
+                : 'border-cyg-outline/20 bg-cyg-outline/8 text-cyg-inverse-on-surface/75',
             ]"
-            href="#"
           >
-            {{ link }}
-          </a>
+            {{ category.label }} · {{ category.itemCount }}
+          </span>
         </div>
         <div class="flex items-center space-x-2">
           <button
@@ -387,7 +436,7 @@ function timeLabelFor(item: CygSoundItem): string {
                 ? 'text-cyg-on-surface-variant hover:bg-cyg-surface-container-high'
                 : 'text-cyg-inverse-on-surface hover:bg-cyg-outline/15',
             ]"
-            :aria-label="isDarkMode ? 'Switch to bright mode' : 'Switch to celebration dark mode'"
+            :aria-label="isDarkMode ? '切換為亮色模式' : '切換為慶典夜色模式'"
             :aria-pressed="isDarkMode"
             @click="toggleDarkMode"
           >
@@ -399,7 +448,7 @@ function timeLabelFor(item: CygSoundItem): string {
       </div>
     </nav>
 
-    <header class="relative pt-32 pb-12 lg:pt-40 lg:pb-20 px-6 z-10">
+    <header class="relative pt-32 pb-10 lg:pt-40 lg:pb-16 px-6 z-10">
       <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12">
         <div class="lg:w-1/2 text-center lg:text-left space-y-6">
           <div
@@ -411,7 +460,7 @@ function timeLabelFor(item: CygSoundItem): string {
             ]"
           >
             <span class="material-icons-round text-sm mr-2 animate-pulse">auto_awesome</span>
-            Festive Dragon Sound Ritual
+            真實音檔驅動 · 581 段片段
           </div>
           <h1
             :class="[
@@ -422,31 +471,98 @@ function timeLabelFor(item: CygSoundItem): string {
                 : 'from-cyg-inverse-primary via-cyg-tertiary-container to-cyg-on-primary-fixed',
             ]"
           >
-            Dragon Birthday<br />Signal Board
+            CYG 龍慶音效庫
           </h1>
           <p
             :class="[
-              'text-lg max-w-lg mx-auto lg:mx-0 leading-[1.6]',
+              'text-lg max-w-xl mx-auto lg:mx-0 leading-[1.6]',
               isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/75',
             ]"
           >
-            A ruby-lit soundboard for dragon roars, cake sparks, and community cheers wrapped in soft glass and celebratory chaos.
+            直接讀取 `soundboard-data.json` 與 `sounds-web` 原始片段，把日常、叫聲、暴言到福利全部收進同一個 ruby-glass 控制台。
           </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div
+              v-for="stat in heroStats"
+              :key="stat.label"
+              :class="[
+                'rounded-[1.5rem] border px-4 py-4 cyg-glass text-left',
+                isDarkMode
+                  ? 'border-cyg-primary/15 bg-cyg-surface-container/65'
+                  : 'border-cyg-outline/20 bg-cyg-inverse-surface/70',
+              ]"
+            >
+              <div class="text-2xl font-cyg-display font-extrabold text-cyg-primary">
+                {{ stat.value }}
+              </div>
+              <div
+                :class="[
+                  'mt-1 text-sm',
+                  isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
+                ]"
+              >
+                {{ stat.label }}
+              </div>
+            </div>
+          </div>
         </div>
+
         <div class="lg:w-1/2 relative flex justify-center">
           <div class="absolute inset-0 bg-gradient-to-tr from-cyg-primary-container to-cyg-tertiary-container opacity-30 blur-[90px] rounded-full transform scale-75" />
           <div
             :class="[
-              'relative z-10 w-[350px] lg:w-[450px] h-[400px] lg:h-[500px] rounded-[2rem] overflow-hidden flex items-center justify-center shadow-2xl cyg-glass cyg-dragon-scale',
+              'relative z-10 w-[350px] lg:w-[450px] h-[400px] lg:h-[500px] rounded-[2rem] overflow-hidden flex flex-col justify-between p-8 shadow-2xl cyg-glass cyg-dragon-scale',
               isDarkMode
                 ? 'bg-cyg-surface-container/70 border border-cyg-primary/20 shadow-cyg-primary-container/30'
                 : 'bg-cyg-primary-fixed/50 border border-cyg-outline/30 shadow-cyg-outline/20',
             ]"
           >
-            <div class="text-9xl lg:text-[12rem] cyg-animate-pulse-soft">
-              🐉
+            <div class="flex items-start justify-between">
+              <span
+                :class="[
+                  'rounded-full px-3 py-1 text-xs font-bold tracking-[0.14em] uppercase border',
+                  isDarkMode
+                    ? 'bg-cyg-primary-container/25 border-cyg-primary/20 text-cyg-primary'
+                    : 'bg-cyg-primary/10 border-cyg-inverse-primary/15 text-cyg-inverse-primary',
+                ]"
+              >
+                Live data
+              </span>
+              <span class="text-5xl cyg-animate-pulse-soft">🐉</span>
+            </div>
+
+            <div class="space-y-3">
+              <div
+                v-for="category in cygTopCategories"
+                :key="category.id"
+                :class="[
+                  'rounded-[1.25rem] px-4 py-3 border flex items-center justify-between',
+                  isDarkMode
+                    ? 'bg-cyg-surface-container-low/70 border-cyg-primary/12'
+                    : 'bg-cyg-inverse-surface/70 border-cyg-outline/18',
+                ]"
+              >
+                <div>
+                  <div class="font-bold">
+                    {{ category.label }}
+                  </div>
+                  <div
+                    :class="[
+                      'text-sm',
+                      isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
+                    ]"
+                  >
+                    高密度片段分類
+                  </div>
+                </div>
+                <div class="text-2xl font-cyg-display font-extrabold text-cyg-primary">
+                  {{ category.itemCount }}
+                </div>
+              </div>
             </div>
           </div>
+
           <div
             :class="[
               'absolute top-10 right-10 p-3 rounded-2xl shadow-xl rotate-12 animate-bounce hover:rotate-0 transition-all duration-300 cursor-pointer',
@@ -468,14 +584,93 @@ function timeLabelFor(item: CygSoundItem): string {
     </header>
 
     <main class="max-w-7xl mx-auto px-6 pb-32 z-10 relative">
-      <div class="flex flex-wrap justify-center gap-3 mb-12">
+      <section
+        :class="[
+          'mb-8 rounded-[2rem] border p-5 cyg-glass',
+          isDarkMode
+            ? 'border-cyg-primary/15 bg-cyg-surface-container-low/60'
+            : 'border-cyg-outline/20 bg-cyg-inverse-surface/75',
+        ]"
+      >
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div class="space-y-1">
+            <div class="font-cyg-display text-2xl font-extrabold">
+              搜尋真實片段
+            </div>
+            <div
+              :class="[
+                'text-sm',
+                isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
+              ]"
+            >
+              可搜尋標題、子分類、檔名與片段 ID。
+            </div>
+          </div>
+
+          <div class="w-full lg:max-w-xl">
+            <label class="relative block">
+              <span class="sr-only">搜尋 CYG soundboard</span>
+              <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-cyg-primary">
+                search
+              </span>
+              <input
+                v-model="searchQuery"
+                data-cyg-search-input
+                type="text"
+                placeholder="例如：EEOO、立旗、a-10、A-10"
+                :class="[
+                  'w-full rounded-full border pl-12 pr-12 py-3 outline-none transition-colors',
+                  isDarkMode
+                    ? 'border-cyg-primary/16 bg-cyg-surface-container-high/80 text-cyg-on-surface placeholder:text-cyg-outline focus:border-cyg-tertiary'
+                    : 'border-cyg-outline/25 bg-cyg-inverse-surface text-cyg-inverse-on-surface placeholder:text-cyg-inverse-on-surface/45 focus:border-cyg-tertiary-container',
+                ]"
+              />
+              <button
+                v-if="searchQuery.length > 0"
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 text-cyg-primary transition-colors hover:bg-cyg-primary/10"
+                aria-label="清除搜尋"
+                @click="clearSearch"
+              >
+                <span class="material-icons-round text-base">close</span>
+              </button>
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <span
+            :class="[
+              'rounded-full px-3 py-1 text-xs font-bold border',
+              isDarkMode
+                ? 'border-cyg-primary/15 bg-cyg-primary/8 text-cyg-primary'
+                : 'border-cyg-outline/18 bg-cyg-primary/8 text-cyg-inverse-primary',
+            ]"
+          >
+            {{ visibleSummaryLabel }}
+          </span>
+          <span
+            v-if="searchQuery.length > 0"
+            :class="[
+              'rounded-full px-3 py-1 text-xs border',
+              isDarkMode
+                ? 'border-cyg-tertiary/20 bg-cyg-tertiary/10 text-cyg-tertiary'
+                : 'border-cyg-tertiary-container/20 bg-cyg-tertiary/10 text-cyg-tertiary-container',
+            ]"
+          >
+            搜尋中：{{ searchQuery }}
+          </span>
+        </div>
+      </section>
+
+      <div class="flex flex-wrap justify-center gap-3 mb-10">
         <button
-          v-for="category in cygCategories"
+          v-for="category in cygCategoryOptions"
           :key="category.id"
           type="button"
           :aria-pressed="category.id === activeCategoryId"
           :class="[
-            'px-6 py-2.5 rounded-full font-semibold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-cyg-primary/40',
+            'px-5 py-2.5 rounded-full font-semibold transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-cyg-primary/40',
             category.id === activeCategoryId
               ? 'bg-cyg-primary-container text-cyg-on-primary-container font-bold shadow-lg shadow-cyg-primary-container/30 transform hover:scale-105'
               : [
@@ -487,7 +682,8 @@ function timeLabelFor(item: CygSoundItem): string {
           ]"
           @click="handleSelectCategory(category.id)"
         >
-          {{ category.label }}
+          <span>{{ category.label }}</span>
+          <span class="ml-2 text-xs opacity-75">{{ category.itemCount }}</span>
         </button>
       </div>
 
@@ -498,19 +694,19 @@ function timeLabelFor(item: CygSoundItem): string {
           isDarkMode ? 'border-cyg-outline-variant text-cyg-on-surface-variant' : 'border-cyg-outline text-cyg-inverse-on-surface/60',
         ]"
       >
-        No sounds in this category yet.
+        目前篩選條件沒有對應片段。
       </div>
 
       <div
         v-else
-        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
         <article
           v-for="item in visibleItems"
           :key="item.id"
           :data-cyg-sound-id="item.id"
           :class="[
-            'group relative cyg-glass rounded-[1.75rem] p-4 cyg-bounce-hover overflow-hidden text-left flex flex-col justify-between h-32',
+            'group relative cyg-glass rounded-[1.75rem] p-5 cyg-bounce-hover overflow-hidden text-left flex flex-col justify-between min-h-[11rem]',
             activeItemIds.has(item.id)
               ? [
                   'cyg-playing-card border-2 border-cyg-primary transform -translate-y-1',
@@ -540,22 +736,57 @@ function timeLabelFor(item: CygSoundItem): string {
             v-else
             class="absolute inset-0 bg-gradient-to-br from-cyg-primary/10 to-cyg-tertiary/10 transition-all duration-300"
           />
-          <span
-            :class="[
-              'font-bold z-10 transition-colors',
-              activeItemIds.has(item.id)
-                ? isDarkMode
-                  ? 'text-cyg-on-primary-container'
-                  : 'text-cyg-inverse-primary'
-                : [
-                    'group-hover:text-cyg-primary',
-                    isDarkMode ? 'text-cyg-on-surface' : 'text-cyg-inverse-on-surface',
-                  ],
-            ]"
-          >
-            {{ item.title }}
-          </span>
-          <div class="flex justify-between items-end z-10 w-full">
+
+          <div class="relative z-10 flex items-start justify-between gap-3">
+            <span
+              :class="[
+                'inline-flex rounded-full px-3 py-1 text-[11px] font-bold border',
+                activeItemIds.has(item.id)
+                  ? 'bg-cyg-primary/14 border-cyg-primary/20 text-cyg-primary'
+                  : isDarkMode
+                    ? 'bg-cyg-surface-container-high border-cyg-primary/10 text-cyg-on-surface-variant'
+                    : 'bg-cyg-outline/8 border-cyg-outline/20 text-cyg-inverse-on-surface/70',
+              ]"
+            >
+              {{ item.badge }}
+            </span>
+            <span
+              :class="[
+                'text-[10px] font-bold tracking-[0.14em] uppercase',
+                isDarkMode ? 'text-cyg-outline' : 'text-cyg-inverse-on-surface/45',
+              ]"
+            >
+              {{ item.id }}
+            </span>
+          </div>
+
+          <div class="relative z-10 mt-4 space-y-2">
+            <div
+              :class="[
+                'font-bold leading-snug max-h-[3.2rem] overflow-hidden',
+                activeItemIds.has(item.id)
+                  ? isDarkMode
+                    ? 'text-cyg-on-primary-container'
+                    : 'text-cyg-inverse-primary'
+                  : [
+                      'group-hover:text-cyg-primary',
+                      isDarkMode ? 'text-cyg-on-surface' : 'text-cyg-inverse-on-surface',
+                    ],
+              ]"
+            >
+              {{ item.title }}
+            </div>
+            <div
+              :class="[
+                'text-[11px]',
+                isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/55',
+              ]"
+            >
+              {{ item.filename }}
+            </div>
+          </div>
+
+          <div class="relative z-10 mt-4 flex justify-between items-end gap-3">
             <span
               :class="[
                 'text-xs font-mono',
@@ -566,7 +797,7 @@ function timeLabelFor(item: CygSoundItem): string {
                     : 'text-cyg-inverse-on-surface/55',
               ]"
             >
-              {{ timeLabelFor(item) }}
+              {{ metaLabelFor(item) }}
             </span>
             <button
               v-if="activeItemIds.has(item.id)"
@@ -579,6 +810,7 @@ function timeLabelFor(item: CygSoundItem): string {
               <span class="material-icons-round text-base">stop</span>
             </button>
           </div>
+
           <div
             v-if="activeItemIds.has(item.id)"
             class="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-cyg-primary-container via-cyg-tertiary to-cyg-primary transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(255,179,178,0.72)]"
