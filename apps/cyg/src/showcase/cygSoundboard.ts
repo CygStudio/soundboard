@@ -28,6 +28,18 @@ export interface CygCategoryOption extends SoundboardCategory {
 }
 
 const cygSourceData = soundboardData satisfies CygSourceData;
+const cygBasePath =
+  import.meta.env.BASE_URL === "/"
+    ? ""
+    : import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function toCygAssetUrl(audioUrl: string): string {
+  if (!audioUrl.startsWith("/")) {
+    return audioUrl;
+  }
+
+  return `${cygBasePath}${audioUrl}`;
+}
 
 export const CYG_ALL_CATEGORY_ID = "all";
 
@@ -54,6 +66,7 @@ export const cygCategories: readonly SoundboardCategory[] = cygCategoryOptions.m
 
 export const cygSoundItems: readonly CygSoundItem[] = cygSourceData.items.map((item) => ({
   ...item,
+  audioUrl: toCygAssetUrl(item.audioUrl),
   badge: item.subcategory ?? item.categoryId,
   description: `${item.id} · ${item.filename}`,
   durationLabel: item.subcategory ?? item.id,
