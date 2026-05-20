@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@source "./**/*.{ts,vue}";
+@source "../../../packages/ui/src/**/*.{ts,vue}";
+@source "../../../packages/widget/src/**/*.{ts,vue}";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-cyg-surface: #131313;
+  --color-cyg-surface-dim: #131313;
+  --color-cyg-surface-bright: #393939;
+  --color-cyg-surface-container-lowest: #0e0e0e;
+  --color-cyg-surface-container-low: #1c1b1b;
+  --color-cyg-surface-container: #20201f;
+  --color-cyg-surface-container-high: #2a2a2a;
+  --color-cyg-surface-container-highest: #353535;
+  --color-cyg-on-surface: #e5e2e1;
+  --color-cyg-on-surface-variant: #e4bdbc;
+  --color-cyg-inverse-surface: #e5e2e1;
+  --color-cyg-inverse-on-surface: #313030;
+  --color-cyg-outline: #ab8887;
+  --color-cyg-outline-variant: #5c403f;
+  --color-cyg-surface-tint: #ffb3b2;
+  --color-cyg-primary: #ffb3b2;
+  --color-cyg-on-primary: #680012;
+  --color-cyg-primary-container: #d11f37;
+  --color-cyg-on-primary-container: #ffe9e7;
+  --color-cyg-inverse-primary: #be082c;
+  --color-cyg-secondary: #d1c4bc;
+  --color-cyg-on-secondary: #362f29;
+  --color-cyg-secondary-container: #4e453f;
+  --color-cyg-on-secondary-container: #bfb3ab;
+  --color-cyg-tertiary: #ffb0d0;
+  --color-cyg-on-tertiary: #63003d;
+  --color-cyg-tertiary-container: #bd337e;
+  --color-cyg-on-tertiary-container: #ffe8ee;
+  --color-cyg-error: #ffb4ab;
+  --color-cyg-on-error: #690005;
+  --color-cyg-error-container: #93000a;
+  --color-cyg-on-error-container: #ffdad6;
+  --color-cyg-primary-fixed: #ffdad8;
+  --color-cyg-primary-fixed-dim: #ffb3b2;
+  --color-cyg-on-primary-fixed: #410008;
+  --color-cyg-on-primary-fixed-variant: #92001e;
+  --color-cyg-secondary-fixed: #ede0d7;
+  --color-cyg-secondary-fixed-dim: #d1c4bc;
+  --color-cyg-on-secondary-fixed: #211a15;
+  --color-cyg-on-secondary-fixed-variant: #4e453f;
+  --color-cyg-tertiary-fixed: #ffd8e6;
+  --color-cyg-tertiary-fixed-dim: #ffb0d0;
+  --color-cyg-on-tertiary-fixed: #3d0024;
+  --color-cyg-on-tertiary-fixed-variant: #8c0058;
+  --color-cyg-background: #131313;
+  --color-cyg-on-background: #e5e2e1;
+  --color-cyg-surface-variant: #353535;
+  --font-cyg-display: "Plus Jakarta Sans", sans-serif;
+  --font-cyg-body: "DM Sans", sans-serif;
+}
+
+.cyg-glass {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.cyg-bounce-hover {
+  transition:
+    box-shadow 240ms ease,
+    transform 240ms ease;
+}
+.cyg-bounce-hover:hover {
+  transform: translateY(-5px) rotate(-0.5deg);
+}
+
+.cyg-playing-card {
+  box-shadow:
+    0 24px 60px -22px rgba(209, 31, 55, 0.65),
+    0 0 36px rgba(255, 176, 208, 0.22),
+    inset 0 1px 0 rgba(255, 233, 231, 0.28);
+}
+
+.cyg-confetti-pattern {
+  background-image:
+    radial-gradient(circle at 12px 12px, rgba(255, 179, 178, 0.14) 0 2px, transparent 3px),
+    linear-gradient(135deg, transparent 0 45%, rgba(255, 176, 208, 0.12) 46% 54%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 8h8v8H8z' fill='%23FFD166' fill-opacity='.16'/%3E%3Cpath d='M34 26l7 4-4 7-7-4z' fill='%2357C7FF' fill-opacity='.14'/%3E%3C/svg%3E");
+  background-size: 32px 32px, 44px 44px, 96px 96px;
+}
+
+@keyframes cyg-pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+.cyg-animate-pulse-soft {
+  animation: cyg-pulse-soft 2.4s infinite ease-in-out;
+}
+
+@keyframes cyg-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--cyg-rotate, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(calc(var(--cyg-rotate, 0deg) + 8deg));
+  }
+}
+
+.cyg-float {
+  animation: cyg-float 5s ease-in-out infinite;
+}
+
+.cyg-dragon-scale {
+  background-image:
+    radial-gradient(circle at 50% 100%, rgba(255, 179, 178, 0.2) 0 20%, transparent 21%),
+    radial-gradient(circle at 0 0, rgba(189, 51, 126, 0.16) 0 22%, transparent 23%);
+  background-size: 34px 34px;
+}

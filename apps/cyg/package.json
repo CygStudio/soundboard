@@ -1,0 +1,18 @@
+{
+  "name": "@soundboard/cyg",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@soundboard/core": "workspace:*",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.6"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "oxlint .",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
+  }
+}
