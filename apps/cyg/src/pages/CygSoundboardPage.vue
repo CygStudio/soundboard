@@ -73,7 +73,7 @@ const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLo
 const heroStats = computed<readonly HeroStat[]>(() => [
   { label: "音效總數", value: `${cygSummary.totalItems}` },
   { label: "分類", value: `${cygSummary.totalCategories}` },
-  { label: "有子標籤", value: `${cygSummary.taggedItems}` },
+  // { label: "有子標籤", value: `${cygSummary.taggedItems}` },
 ]);
 
 const activeCategoryLabel = computed(() => {
@@ -379,8 +379,9 @@ function metaLabelFor(item: CygSoundItem): string {
         ]"
       >
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-cyg-primary bg-gradient-to-br from-cyg-primary-container via-cyg-tertiary-container to-cyg-surface-container-high flex items-center justify-center shadow-lg shadow-cyg-primary-container/30">
-            <span class="text-cyg-on-primary-container font-cyg-display font-extrabold text-lg">D</span>
+          <div class="w-10 h-10 rounded-full overflow-hidden  border-cyg-primary bg-gradient-to-br from-cyg-primary-container via-cyg-tertiary-container to-cyg-surface-container-high flex items-center justify-center shadow-lg shadow-cyg-primary-container/30">
+            <!-- <span class="text-cyg-on-primary-container font-cyg-display font-extrabold text-lg">D</span> -->
+             <img src="https://cyg.sid.tw/images/icon.webp" alt="">
           </div>
           <div class="flex flex-col">
             <span
@@ -389,7 +390,7 @@ function metaLabelFor(item: CygSoundItem): string {
                 isDarkMode ? 'text-cyg-primary' : 'text-cyg-inverse-primary',
               ]"
             >
-              Dragon Celebration System
+              熙歌音效版
             </span>
             <span
               :class="[
@@ -402,7 +403,7 @@ function metaLabelFor(item: CygSoundItem): string {
           </div>
         </div>
         <div class="hidden md:flex items-center space-x-6">
-          <span
+          <!-- <span
             v-for="category in cygTopCategories"
             :key="category.id"
             :class="[
@@ -413,10 +414,10 @@ function metaLabelFor(item: CygSoundItem): string {
             ]"
           >
             {{ category.label }} · {{ category.itemCount }}
-          </span>
+          </span> -->
         </div>
         <div class="flex items-center space-x-2">
-          <button
+          <!-- <button
             type="button"
             :class="[
               'p-2 rounded-full transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-cyg-primary/40',
@@ -443,7 +444,7 @@ function metaLabelFor(item: CygSoundItem): string {
             <span class="material-icons-round text-xl">
               {{ isDarkMode ? "light_mode" : "dark_mode" }}
             </span>
-          </button>
+          </button> -->
         </div>
       </div>
     </nav>
@@ -460,9 +461,9 @@ function metaLabelFor(item: CygSoundItem): string {
             ]"
           >
             <span class="material-icons-round text-sm mr-2 animate-pulse">auto_awesome</span>
-            真實音檔驅動 · 581 段片段
+            581 段片段
           </div>
-          <h1
+          <!-- <h1
             :class="[
               'font-cyg-display font-extrabold text-5xl lg:text-7xl leading-[1.1] tracking-[-0.02em]',
               'text-transparent bg-clip-text bg-gradient-to-r filter drop-shadow-sm',
@@ -471,15 +472,15 @@ function metaLabelFor(item: CygSoundItem): string {
                 : 'from-cyg-inverse-primary via-cyg-tertiary-container to-cyg-on-primary-fixed',
             ]"
           >
-            CYG 龍慶音效庫
-          </h1>
+            熙歌音效版
+          </h1> -->
           <p
             :class="[
               'text-lg max-w-xl mx-auto lg:mx-0 leading-[1.6]',
               isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/75',
             ]"
           >
-            直接讀取 `soundboard-data.json` 與 `sounds-web` 原始片段，把日常、叫聲、暴言到福利全部收進同一個 ruby-glass 控制台。
+            把日常、叫聲、暴言到福利全部收錄在這裡，讓我們一起 088 ！
           </p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -512,13 +513,13 @@ function metaLabelFor(item: CygSoundItem): string {
           <div class="absolute inset-0 bg-gradient-to-tr from-cyg-primary-container to-cyg-tertiary-container opacity-30 blur-[90px] rounded-full transform scale-75" />
           <div
             :class="[
-              'relative z-10 w-[350px] lg:w-[450px] h-[400px] lg:h-[500px] rounded-[2rem] overflow-hidden flex flex-col justify-between p-8 shadow-2xl cyg-glass cyg-dragon-scale',
+              'relative z-10 w-[350px] lg:w-[450px] rounded-[2rem] overflow-hidden flex flex-col justify-between p-8 shadow-2xl cyg-glass cyg-dragon-scale',
               isDarkMode
                 ? 'bg-cyg-surface-container/70 border border-cyg-primary/20 shadow-cyg-primary-container/30'
                 : 'bg-cyg-primary-fixed/50 border border-cyg-outline/30 shadow-cyg-outline/20',
             ]"
           >
-            <div class="flex items-start justify-between">
+            <!-- <div class="flex items-start justify-between">
               <span
                 :class="[
                   'rounded-full px-3 py-1 text-xs font-bold tracking-[0.14em] uppercase border',
@@ -530,11 +531,11 @@ function metaLabelFor(item: CygSoundItem): string {
                 Live data
               </span>
               <span class="text-5xl cyg-animate-pulse-soft">🐉</span>
-            </div>
+            </div> -->
 
             <div class="space-y-3">
               <div
-                v-for="category in cygTopCategories"
+                v-for="(category, index) in cygTopCategories"
                 :key="category.id"
                 :class="[
                   'rounded-[1.25rem] px-4 py-3 border flex items-center justify-between',
@@ -543,7 +544,17 @@ function metaLabelFor(item: CygSoundItem): string {
                     : 'bg-cyg-inverse-surface/70 border-cyg-outline/18',
                 ]"
               >
-                <div>
+                <div class="font-bold" v-if="index === 0">
+                  企劃發起：<br/>
+                  DJ DÄZEE
+                </div>
+                <div class="font-bold" v-if="index === 1">
+                  技術負責、音訊處理：<br/>排氣管管、DJ DÄZEE
+                </div>
+                <div class="font-bold" v-if="index === 2">
+                  片段收集：<br/>維、Eden、シュ婚叫セン、歐咖吶哋島油
+                </div>
+                <!-- <div>
                   <div class="font-bold">
                     {{ category.label }}
                   </div>
@@ -553,12 +564,12 @@ function metaLabelFor(item: CygSoundItem): string {
                       isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/65',
                     ]"
                   >
-                    高密度片段分類
+                    主要分類片段
                   </div>
                 </div>
                 <div class="text-2xl font-cyg-display font-extrabold text-cyg-primary">
                   {{ category.itemCount }}
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -617,7 +628,7 @@ function metaLabelFor(item: CygSoundItem): string {
                 v-model="searchQuery"
                 data-cyg-search-input
                 type="text"
-                placeholder="例如：EEOO、立旗、a-10、A-10"
+                placeholder="例如：大長腿、真香"
                 :class="[
                   'w-full rounded-full border pl-12 pr-12 py-3 outline-none transition-colors',
                   isDarkMode
@@ -756,7 +767,7 @@ function metaLabelFor(item: CygSoundItem): string {
                 isDarkMode ? 'text-cyg-outline' : 'text-cyg-inverse-on-surface/45',
               ]"
             >
-              {{ item.id }}
+              <!-- {{ item.id }} -->
             </span>
           </div>
 
@@ -782,12 +793,12 @@ function metaLabelFor(item: CygSoundItem): string {
                 isDarkMode ? 'text-cyg-on-surface-variant' : 'text-cyg-inverse-on-surface/55',
               ]"
             >
-              {{ item.filename }}
+              <!-- {{ item.filename }} -->
             </div>
           </div>
 
           <div class="relative z-10 mt-4 flex justify-between items-end gap-3">
-            <span
+            <!-- <span
               :class="[
                 'text-xs font-mono',
                 activeItemIds.has(item.id)
@@ -808,7 +819,7 @@ function metaLabelFor(item: CygSoundItem): string {
               @click="handleStopSound(item.id)"
             >
               <span class="material-icons-round text-base">stop</span>
-            </button>
+            </button> -->
           </div>
 
           <div
