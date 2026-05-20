@@ -2403,14 +2403,6 @@
       "audioUrl": "/sounds-web/b-215.webm"
     },
     {
-      "id": "B-216",
-      "categoryId": "叫聲",
-      "title": "啊~~~(快破音)",
-      "subcategory": null,
-      "filename": "b-216.webm",
-      "audioUrl": "/sounds-web/b-216.webm"
-    },
-    {
       "id": "B-217",
       "categoryId": "日常",
       "title": "那個那個那個 太陰險了吧",
@@ -3043,22 +3035,6 @@
       "audioUrl": "/sounds-web/b-296.webm"
     },
     {
-      "id": "B-297",
-      "categoryId": "日常",
-      "title": "你就是個M",
-      "subcategory": "罵",
-      "filename": "b-297.webm",
-      "audioUrl": "/sounds-web/b-297.webm"
-    },
-    {
-      "id": "B-298",
-      "categoryId": "福利",
-      "title": "我愛你們喔~",
-      "subcategory": null,
-      "filename": "b-298.webm",
-      "audioUrl": "/sounds-web/b-298.webm"
-    },
-    {
       "id": "C-4",
       "categoryId": "日常",
       "title": "我好睏啊(哈欠)",
@@ -3121,14 +3097,6 @@
       "subcategory": null,
       "filename": "c-11.webm",
       "audioUrl": "/sounds-web/c-11.webm"
-    },
-    {
-      "id": "C-12",
-      "categoryId": "噴嚏",
-      "title": "噴嚏",
-      "subcategory": null,
-      "filename": "c-12.webm",
-      "audioUrl": "/sounds-web/c-12.webm"
     },
     {
       "id": "C-13",
@@ -3377,14 +3345,6 @@
       "subcategory": null,
       "filename": "c-45.webm",
       "audioUrl": "/sounds-web/c-45.webm"
-    },
-    {
-      "id": "C-46",
-      "categoryId": "分靈體",
-      "title": "HENTAI!!!(熙蘿)",
-      "subcategory": null,
-      "filename": "c-46.webm",
-      "audioUrl": "/sounds-web/c-46.webm"
     },
     {
       "id": "C-47",
@@ -3763,14 +3723,6 @@
       "audioUrl": "/sounds-web/c-108.webm"
     },
     {
-      "id": "C-109",
-      "categoryId": "日常",
-      "title": "地震!!!",
-      "subcategory": null,
-      "filename": "c-109.webm",
-      "audioUrl": "/sounds-web/c-109.webm"
-    },
-    {
       "id": "C-110",
       "categoryId": "日常",
       "title": "所以為甚麼WINK需要這麼用力",
@@ -3825,14 +3777,6 @@
       "subcategory": "罵",
       "filename": "c-116.webm",
       "audioUrl": "/sounds-web/c-116.webm"
-    },
-    {
-      "id": "C-117",
-      "categoryId": "福利",
-      "title": "爽嗎？臭DD",
-      "subcategory": "罵倒",
-      "filename": "c-117.webm",
-      "audioUrl": "/sounds-web/c-117.webm"
     },
     {
       "id": "C-118",
@@ -3979,14 +3923,6 @@
       "audioUrl": "/sounds-web/c-137.webm"
     },
     {
-      "id": "C-139",
-      "categoryId": "日常",
-      "title": "有白色小雞???",
-      "subcategory": null,
-      "filename": "c-139.webm",
-      "audioUrl": "/sounds-web/c-139.webm"
-    },
-    {
       "id": "C-141",
       "categoryId": "日常",
       "title": "阿洛夫86生日快樂",
@@ -4043,14 +3979,6 @@
       "audioUrl": "/sounds-web/c-149.webm"
     },
     {
-      "id": "C-151",
-      "categoryId": "笑聲",
-      "title": "殺了我吧(氣音)",
-      "subcategory": "中風笑",
-      "filename": "c-151.webm",
-      "audioUrl": "/sounds-web/c-151.webm"
-    },
-    {
       "id": "C-152",
       "categoryId": "日常",
       "title": "我是不是甚麼時候做了對不起你的事情你要這樣子對我QAQ",
@@ -4073,14 +4001,6 @@
       "subcategory": "誇摸摸",
       "filename": "c-154.webm",
       "audioUrl": "/sounds-web/c-154.webm"
-    },
-    {
-      "id": "C-155",
-      "categoryId": "日常",
-      "title": "閉嘴啦!!!!!",
-      "subcategory": "罵",
-      "filename": "c-155.webm",
-      "audioUrl": "/sounds-web/c-155.webm"
     },
     {
       "id": "D-4",
@@ -4145,14 +4065,6 @@
       "subcategory": "歐比",
       "filename": "d-16.webm",
       "audioUrl": "/sounds-web/d-16.webm"
-    },
-    {
-      "id": "D-17",
-      "categoryId": "日常",
-      "title": "起床起床起床床",
-      "subcategory": "起床",
-      "filename": "d-17.webm",
-      "audioUrl": "/sounds-web/d-17.webm"
     },
     {
       "id": "D-18",
@@ -4227,14 +4139,6 @@
       "audioUrl": "/sounds-web/e-8.webm"
     },
     {
-      "id": "E-9",
-      "categoryId": "日常",
-      "title": "等一下放生他們好了，我去睡覺",
-      "subcategory": null,
-      "filename": "e-9.webm",
-      "audioUrl": "/sounds-web/e-9.webm"
-    },
-    {
       "id": "E-10",
       "categoryId": "臭人",
       "title": "哇！第一次覺得季錐像個男人",
@@ -4249,14 +4153,6 @@
       "subcategory": null,
       "filename": "e-11.webm",
       "audioUrl": "/sounds-web/e-11.webm"
-    },
-    {
-      "id": "E-12",
-      "categoryId": "日常",
-      "title": "把他吃了",
-      "subcategory": null,
-      "filename": "e-12.webm",
-      "audioUrl": "/sounds-web/e-12.webm"
     },
     {
       "id": "E-13",
@@ -4625,14 +4521,6 @@
       "subcategory": null,
       "filename": "e-64.webm",
       "audioUrl": "/sounds-web/e-64.webm"
-    },
-    {
-      "id": "E-65",
-      "categoryId": "暴言",
-      "title": "包巾，頭包巾",
-      "subcategory": null,
-      "filename": "e-65.webm",
-      "audioUrl": "/sounds-web/e-65.webm"
     },
     {
       "id": "E-66",
